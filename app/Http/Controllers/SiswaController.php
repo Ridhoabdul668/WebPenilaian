@@ -1,74 +1,48 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Siswa;
-use Illuminate\Support\Facades\DB;
-
-
 use Illuminate\Http\Request;
 
 class SiswaController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar siswa.
      */
     public function index()
     {
-        $data_siswa = \App\Models\Siswa::all();
-        return view('siswa.index', ['data_siswa' => $data_siswa]);
+        $data_siswa = Siswa::all();
+        return view('siswa.index', compact('data_siswa'));
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create(Request $request)
-    {
-       
-        $siswa = new \App\Models\Siswa;
-        return redirect('/siswa');
-      
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Menyimpan data siswa ke database.
      */
     public function store(Request $request)
     {
-     
-         
+        // Validasi input
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'jenis_kelamin' => 'required',
+            'agama' => 'required|string|max:50',
+            'alamat' => 'required|string|max:500',
+        ]);
+
+        // Simpan data siswa
+        Siswa::create($request->all());
+
+        return redirect('/siswa')->with('success', 'Data siswa berhasil ditambahkan.');
     }
 
     /**
-     * Display the specified resource.
+     * Menghapus data siswa.
      */
-    public function show(string $id)
+    public function destroy($id)
     {
-        //
-    }
+        $siswa = Siswa::findOrFail($id);
+        $siswa->delete();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        return redirect('/siswa')->with('success', 'Data siswa berhasil dihapus.');
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
-    
 }

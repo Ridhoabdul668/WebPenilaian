@@ -7,7 +7,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
+// Menggunakan resource controller untuk menangani semua CRUD siswa
 Route::resource('siswa', SiswaController::class);
-Route::post('/siswa/create', [SiswaController::class, 'store']);
-
