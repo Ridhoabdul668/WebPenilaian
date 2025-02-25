@@ -62,6 +62,76 @@
             </div>
         </div>
 
+
+<!-- Modal Edit Siswa -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Siswa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-form" method="POST">
+                    @csrf
+                    @method('POST')  <!-- Menentukan metode PUT -->
+                    <input type="hidden" id="edit-id">
+
+                    <div class="mb-3">
+                        <label class="form-label">Nama</label>
+                        <input name="nama" id="edit-nama" type="text" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jenis Kelamin</label>
+                        <select name="jenis_kelamin" id="edit-jenis_kelamin" class="form-select" required>
+                            <option value="Laki-Laki">Laki-Laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Agama</label>
+                        <input name="agama" id="edit-agama" type="text" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Alamat</label>
+                        <textarea name="alamat" id="edit-alamat" class="form-control" rows="3" required></textarea>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".edit-button").forEach(button => {
+            button.addEventListener("click", function () {
+                let id = this.getAttribute("data-id");
+                
+                // Ambil data siswa dari server
+                fetch(`/siswa/${id}/edit`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("edit-id").value = data.id;
+                        document.getElementById("edit-nama").value = data.nama;
+                        document.getElementById("edit-jenis_kelamin").value = data.jenis_kelamin;
+                        document.getElementById("edit-agama").value = data.agama;
+                        document.getElementById("edit-alamat").value = data.alamat;
+
+                        // Set action URL di form update
+                        document.getElementById("edit-form").action = `/siswa/${id}`;
+                    });
+            });
+        });
+    });
+</script>
+
+
         <!-- Tabel Data Siswa -->
         <table class="table table-hover">
             <thead>
@@ -81,6 +151,8 @@
                         <td>{{ $siswa->agama }}</td>
                         <td>{{ $siswa->alamat }}</td>
                         <td>
+                            <!-- Tombol Edit -->
+                            <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal" onclick="populateEditForm({{ $siswa }})">Edit</button>
                             <!-- Tombol Hapus -->
                             <form action="{{ route('siswa.destroy', $siswa->id) }}" method="POST" class="d-inline">
                                 @csrf
@@ -96,5 +168,14 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function populateEditForm(siswa) {
+            document.getElementById('editForm').action = `/siswa/${siswa.id}`;
+            document.getElementById('edit_nama').value = siswa.nama;
+            document.getElementById('edit_jenis_kelamin').value = siswa.jenis_kelamin;
+            document.getElementById('edit_agama').value = siswa.agama;
+            document.getElementById('edit_alamat').value = siswa.alamat;
+        }
+    </script>
 </body>
 </html>

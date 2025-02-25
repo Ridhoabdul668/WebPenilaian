@@ -21,7 +21,6 @@ class SiswaController extends Controller
      */
     public function store(Request $request)
     {
-        // Validasi input
         $request->validate([
             'nama' => 'required|string|max:255',
             'jenis_kelamin' => 'required',
@@ -29,11 +28,43 @@ class SiswaController extends Controller
             'alamat' => 'required|string|max:500',
         ]);
 
-        // Simpan data siswa
         Siswa::create($request->all());
 
         return redirect('/siswa')->with('success', 'Data siswa berhasil ditambahkan.');
     }
+
+    /**
+     * Mengambil data siswa untuk diedit.
+     */
+    public function edit($id)
+{
+    $siswa = Siswa::findOrFail($id);
+    return response()->json($siswa);
+}
+
+    /**
+     * Memperbarui data siswa.
+     */
+    public function update(Request $request, $id)
+{
+    $request->validate([
+        'nama' => 'required|string|max:255',
+        'jenis_kelamin' => 'required',
+        'agama' => 'required|string|max:50',
+        'alamat' => 'required|string|max:500',
+    ]);
+
+    $siswa = Siswa::findOrFail($id);
+    $siswa->update([
+        'nama' => $request->nama,
+        'jenis_kelamin' => $request->jenis_kelamin,
+        'agama' => $request->agama,
+        'alamat' => $request->alamat,
+    ]);
+
+    return redirect('/siswa')->with('success', 'Data siswa berhasil diperbarui.');
+}
+
 
     /**
      * Menghapus data siswa.
