@@ -2,78 +2,111 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Siswa;
 use Illuminate\Http\Request;
+use App\Models\Siswa;
+use Illuminate\Support\Facades\Auth; // Tambahkan ini
 
 class SiswaController extends Controller
 {
-    /**
-     * Menampilkan daftar siswa.
-     */
     public function index()
     {
-        $data_siswa = Siswa::all();
+        $data_siswa = Siswa::all()->map(function ($siswa) {
+            $siswa->jenis_kelamin = $siswa->jenis_kelamin == 'P' ? 'Perempuan' : 'Laki-Laki';
+            return $siswa;
+        });
+
         return view('siswa.index', compact('data_siswa'));
     }
 
-    /**
-     * Menyimpan data siswa ke database.
-     */
+    public function create()
+    {
+        return view('siswa.create');
+    }
+
     public function store(Request $request)
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'jenis_kelamin' => 'required',
-            'agama' => 'required|string|max:50',
-            'alamat' => 'required|string|max:500',
+            'jenis_kelamin' => 'required|in:L,P',
+            'agama' => 'required|string',
+            'alamat' => 'required|string',
+            'nilai_harian' => 'required|numeric',
+            'ulangan_1' => 'required|numeric',
+            'ulangan_2' => 'required|numeric',
+            'nilai_akhir_semester' => 'required|numeric',
         ]);
 
-        Siswa::create($request->all());
+        $rata_rata = (
+            ($request->nilai_harian * 0.2) +
+            ($request->ulangan_1 * 0.2) +
+            ($request->ulangan_2 * 0.2) +
+            ($request->nilai_akhir_semester * 0.4)
+        );
 
-        return redirect('/siswa')->with('success', 'Data siswa berhasil ditambahkan.');
+        Siswa::create([
+            'nama' => $request->nama,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'agama' => $request->agama,
+            'alamat' => $request->alamat,
+            'nilai_harian' => $request->nilai_harian,
+            'ulangan_1' => $request->ulangan_1,
+            'ulangan_2' => $request->ulangan_2,
+            'nilai_akhir_semester' => $request->nilai_akhir_semester,
+            'rata_rata' => $rata_rata,
+        ]);
+
+        return redirect()->route('siswa.index')->with('success', 'Siswa berhasil ditambahkan!');
     }
 
-    /**
-     * Mengambil data siswa untuk diedit.
-     */
     public function edit($id)
-{
-    $siswa = Siswa::findOrFail($id);
-    return response()->json($siswa);
-}
+    {
+        $siswa = Siswa::findOrFail($id);
+        return view('siswa.edit', compact('siswa'));
+    }
 
-    /**
-     * Memperbarui data siswa.
-     */
     public function update(Request $request, $id)
-{
-    $request->validate([
-        'nama' => 'required|string|max:255',
-        'jenis_kelamin' => 'required',
-        'agama' => 'required|string|max:50',
-        'alamat' => 'required|string|max:500',
-    ]);
+    {
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'jenis_kelamin' => 'required|in:L,P',
+            'agama' => 'required|string',
+            'alamat' => 'required|string',
+            'nilai_harian' => 'required|numeric',
+            'ulangan_1' => 'required|numeric',
+            'ulangan_2' => 'required|numeric',
+            'nilai_akhir_semester' => 'required|numeric',
+        ]);
 
-    $siswa = Siswa::findOrFail($id);
-    $siswa->update([
-        'nama' => $request->nama,
-        'jenis_kelamin' => $request->jenis_kelamin,
-        'agama' => $request->agama,
-        'alamat' => $request->alamat,
-    ]);
+        $rata_rata = (
+            ($request->nilai_harian * 0.2) +
+            ($request->ulangan_1 * 0.2) +
+            ($request->ulangan_2 * 0.2) +
+            ($request->nilai_akhir_semester * 0.4)
+        );
 
-    return redirect('/siswa')->with('success', 'Data siswa berhasil diperbarui.');
-}
+        $siswa = Siswa::findOrFail($id);
+        $siswa->update([
+            'nama' => $request->nama,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'agama' => $request->agama,
+            'alamat' => $request->alamat,
+            'nilai_harian' => $request->nilai_harian,
+            'ulangan_1' => $request->ulangan_1,
+            'ulangan_2' => $request->ulangan_2,
+            'nilai_akhir_semester' => $request->nilai_akhir_semester,
+            'rata_rata' => $rata_rata,
+        ]);
 
+        return redirect()->route('siswa.index')->with('success', 'Data siswa berhasil diperbarui!');
+    }
 
-    /**
-     * Menghapus data siswa.
-     */
     public function destroy($id)
     {
         $siswa = Siswa::findOrFail($id);
         $siswa->delete();
 
-        return redirect('/siswa')->with('success', 'Data siswa berhasil dihapus.');
+        return redirect()->route('siswa.index')->with('success', 'Data siswa berhasil dihapus!');
     }
-}
+} 
+
+
